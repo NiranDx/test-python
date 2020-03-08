@@ -1,43 +1,29 @@
+import timeit
+start = timeit.default_timer()
+
 import random
-import multiprocessing
 from multiprocessing import Pool
 
+N = 1000000
+process_num = 4
 
-#caculate the number of points in the unit circle
-#out of n points
-def monte_carlo_pi_part(n):
-    
-    count = 0
-    for i in range(n):
-        x=random.random()
-        y=random.random()
-        
-        # if it is within the unit circle
-        if x*x + y*y <= 1:
-            count=count+1
-        
-    #return
-    return count
+def make_pi(n):
+    count_inbound = 0
+    for x in range(n):
+        the_x = random.random()
+        the_y = random.random()
+        if((the_x**2 + the_y**2) <= 1):
+            count_inbound += 1
+    return count_inbound
 
+if __name__ == "__main__":
+    #multiprocessing code
+    p = Pool(processes = process_num)
+    count_in = p.map(make_pi, [int(N/process_num) for x in range(process_num)])
+    print(4*sum(count_in)/N)
 
-if __name__=='__main__':
-    
-    np = multiprocessing.cpu_count()
-    print('You have {0:1d} CPUs'.format(np)) 
+    #normal code
+    #print(4*make_pi(N)/N)
 
-    # Nummber of points to use for the Pi estimation
-    n = 10000000
-    
-    # iterable with a list of points to generate in each worker
-    # each worker process gets n/np number of points to calculate Pi from
-
-    part_count = [n/np] * np
-
-    #Create the worker pool
-    # http://docs.python.org/library/multiprocessing.html#module-multiprocessing.pool
-    pool = Pool(processes=np)   
-
-    # parallel map
-    count = pool.map(monte_carlo_pi_part,part_count)
-
-    print("Esitmated value of Pi:: ", sum(count)/(n*1.0)*4 ) 
+    stop = timeit.default_timer()
+    print(stop - start)
